@@ -8,23 +8,25 @@ use Illuminate\Http\Request;
 
 class ProcessOrdersController extends Controller
 {
-    /** @var OrderProcessingService */
-    protected $orderProcessingService;
+  /** @var OrderProcessingService */
+  protected $orderProcessingService;
 
-    public function __construct(OrderProcessingService $orderProcessingService)
-    {
-        $this->orderProcessingService = $orderProcessingService;
-    }
+  public function __construct(OrderProcessingService $orderProcessingService)
+  {
+    $this->orderProcessingService = $orderProcessingService;
+  }
 
-    /**
-     * Handle the incoming request.
-     *
-     * @param Product $product
-     * @param \Illuminate\Http\Request $request
-     * @return array
-     */
-    public function __invoke($product_id, Request $request)
-    {
-        return $this->orderProcessingService->execute($product_id, $request);
-    }
+  /**
+   * Handle the incoming request.
+   *
+   * @param Product $product
+   * @param \Illuminate\Http\Request $request
+   * @return array
+   */
+  public function __invoke($product_id, Request $request)
+  {
+    $response = $this->orderProcessingService->execute($product_id, $request);
+
+    return response($response);
+  }
 }
