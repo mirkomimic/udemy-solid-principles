@@ -2,69 +2,59 @@
 
 namespace App\Services;
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\StockRepository;
+use App\Services\StripePaymentService;
+use App\Repositories\ProductRepository;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class OrderProcessingService
 {
-  public function execute($product_id, Request $request)
-  {
-    // Find the Product
-    $product = DB::table('products')->find($product_id);
+  /** @var ProductRepository */
+  protected $productRepository;
 
-    // Get the stock level
-    $stock = DB::table('stocks')->find($product_id);
+  /** @var StockRepository */
+  protected $stockRepository;
+
+  /** @var DiscountService */
+  protected $discountService;
+
+  protected StripePaymentService $stripePaymentService;
+
+  public function __construct(
+    ProductRepository $productRepository,
+    StockRepository $stockRepository,
+    DiscountService $discountService,
+    StripePaymentService $stripePaymentService
+  ) {
+    $this->productRepository = $productRepository;
+    $this->stockRepository = $stockRepository;
+    $this->discountService = $discountService;
+    $this->stripePaymentService = $stripePaymentService;
+  }
+
+  public function execute($product_id)
+  {
+    $product = $this->productRepository->getById($product_id);
+
+    $stock = $this->stockRepository->forProduct($product_id);
 
     // check the stock level
-    if ($stock->quantity < 1) {
-      // throw new NotFoundHttpException('We are out of stock');
-      throw ValidationException::withMessages([
-        'stock' => ['we are out of stock']
-      ]);
-    }
+    $this->stockRepository->checkAvailibility($stock);
 
-    // Apply discount
-    $total = $this->applySpecialDiscount($product);
+    $total = $this->discountService->with($product)->applySpecialDiscount();
 
-    // check for payment method
-    $paymentSuccessMessage = '';
+    $paymentSuccessMessage = $this->stripePaymentService->process($total);
 
-    // Attempt payment
-    if ($request->has('payment_method') && $request->input('payment_method') === 'stripe') {
-      $paymentSuccessMessage = $this->processPaymentViaStripe('stripe', $total);
-    }
+    $this->stockRepository->record($product_id);
 
-    // payment succeeded
-    if (!empty($paymentSuccessMessage)) {
-
-      // update Stock
-      DB::table('stocks')
-        ->where('product_id', $product_id)
-        ->update([
-          'quantity' => $stock->quantity - 1
-        ]);
-
-      return [
-        'payment_message' => $paymentSuccessMessage,
-        'discounted_price' => $total,
-        'original_price'  => $product->price,
-        'message' => 'Thank you, your order is being processed'
-      ];
-    }
-  }
-
-  protected function processPaymentViaStripe($provider, $total)
-  {
-    $price = "£{$total}";
-    return 'Processing payment of ' . $price . ' through ' . $provider;
-  }
-
-  protected function applySpecialDiscount($product)
-  {
-    $discount = 0.20 * $product->price;
-    return number_format(($product->price - $discount), 2);
+    return [
+      'payment_message' => $paymentSuccessMessage,
+      'discounted_price' => $total,
+      'original_price'  => $product->price,
+      'message' => 'Thank you, your order is being processed'
+    ];
   }
 }
