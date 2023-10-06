@@ -1,3 +1,5 @@
+./vendor/bin/phpunit --testdox tests --filter ProductsTest
+
 1. Single Responsibility Principle (SRP)
 "A class should have only one reason to change"
 

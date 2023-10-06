@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\ProcessOrdersController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\ProcessOrdersController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,8 +15,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+Route::get('/', [ProductsController::class, 'index']);
 
 Route::post('order/{product_id}/process', ProcessOrdersController::class);
