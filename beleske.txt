@@ -4,3 +4,27 @@
 "A class should have only one reason to change"
 
 - Responsibility is the reason for change
+
+2. Liskov Substitution Principle (LSP)
+"If a program is using a base class, then the reference to the base class
+can be replaced or should be replaceable with a derived class or sub class
+without affecting the functionality of the program"
+
+- return type of methods can't change -- Covariance
+- parameters of the method can't change - Contravariance
+- The exception thrown in sub class should either be the same as parent class
+or more specialized
+
+a. Covariance
+--------------
+Method return type should be covariant i.e. return should be the same or narrower
+Postconditions cannot be weakened in a subtype
+
+b. Contravariance
+-----------------
+Method arguments or input parameters should be the same or widened.
+Preconditions cannot be strengthened in a subtype
+
+c. No new Exceptions
+-----------------------
+No new ixceptions hould be thrown by methods of the subtype, except where those exceptions are themselves subtypes of exceptions thrown by the methods of the supertype
