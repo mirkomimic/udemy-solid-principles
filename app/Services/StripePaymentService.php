@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class StripePaymentService
+class StripePaymentService implements Payable
 {
   public function process($total)
   {

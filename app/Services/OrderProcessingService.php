@@ -21,16 +21,16 @@ class OrderProcessingService
 
   protected $discountService;
 
-  protected StripePaymentService $stripePaymentService;
+  protected $payable;
 
   public function __construct(
     ProductRepositoryInterface $productRepository,
     StockRepositoryInterface $stockRepository,
-    StripePaymentService $stripePaymentService
+    Payable $payable
   ) {
     $this->productRepository = $productRepository;
     $this->stockRepository = $stockRepository;
-    $this->stripePaymentService = $stripePaymentService;
+    $this->payable = $payable;
   }
 
   public function execute($product_id)
@@ -45,7 +45,7 @@ class OrderProcessingService
     // $discountService = new DiscountService(new TwentyPercentDiscount);
     $total = DiscountService::make(new TwentyPercentDiscount)->with($product)->apply();
 
-    $paymentSuccessMessage = $this->stripePaymentService->process($total);
+    $paymentSuccessMessage = $this->payable->process($total);
 
     $this->stockRepository->record($product_id);
 

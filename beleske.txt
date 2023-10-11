@@ -28,3 +28,12 @@ Preconditions cannot be strengthened in a subtype
 c. No new Exceptions
 -----------------------
 No new ixceptions hould be thrown by methods of the subtype, except where those exceptions are themselves subtypes of exceptions thrown by the methods of the supertype
+
+4. Dependency Inversion Principle (dip)
+'High-level modules should not depend on low-level modules. Both should depend on abstractions.'
+'Abstractions should not depend upon details. Details should depend upon sbstractions.'
+
+Further Resources
+
+Head first object-oriented analysis & design (O'Riley)
+Clean Architecture (Robert C. Martin)
